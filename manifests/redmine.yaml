@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redmine
+  namespace: pmotrack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redmine
+  template:
+    metadata:
+      labels:
+        app: redmine
+    spec:
+      containers:
+      - name: redmine
+        image: redmine:5
+        ports:
+        - containerPort: 3000
+        env:
+        - name: REDMINE_DB_POSTGRES
+          value: "postgres-service"
+        - name: REDMINE_DB_DATABASE
+          value: "pmotrackdb"
+        - name: REDMINE_DB_USERNAME
+          value: "admin"
+        - name: REDMINE_DB_PASSWORD
+          value: "password123"
+        resources:
+          requests:
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redmine-service
+  namespace: pmotrack
+spec:
+  type: NodePort
+  selector:
+    app: redmine
+  ports:
+  - port: 3000
+    targetPort: 3000
+    nodePort: 30080
